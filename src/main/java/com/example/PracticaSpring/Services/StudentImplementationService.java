@@ -1,39 +1,38 @@
 package com.example.PracticaSpring.Services;
 
 import com.example.PracticaSpring.Model.StudentsModel;
+import com.example.PracticaSpring.repository.StudentsRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apache.coyote.http11.Constants.a;
 
 @Service
 public class StudentImplementationService implements StudentsService{
-    List<StudentsModel> students= List.of(new StudentsModel("Luis", Map.of( "Ingles",9,"Matematicas",10)),
-                    new StudentsModel("Alex", Map.of("Matematicas",8,"Ingles",8)),
-                    new StudentsModel("Ale",Map.of("Matematicas",9)),
-                    new StudentsModel("Vero",Map.of("Matematicas",9,"Ingles",10)),
-                    new StudentsModel("Sam",Map.of("Ingles",8))
-
-    );
+    @Autowired
+    StudentsRepository studentsRepository;
     public List<StudentsModel> getStudents() {
-        return students;
+        List<StudentsModel> list = studentsRepository.findAll();
+        System.out.println(list);
+        return list;
+
     }
 
     public List<StudentsModel> getStudentsByName(String name){
-        return students.stream().filter(s -> s.name().equals(name)).toList();
+        return studentsRepository.findByTheStudentName(name);
     }
+
     public List<StudentsModel> getExcellentStudents(){
-        return students.stream().filter(s -> s.scores().values().stream().anyMatch(v -> v >= 9 )).toList();
+        return studentsRepository.findAll().stream().filter(s -> s.grades().values().stream().anyMatch(v -> v >= 9 )).toList();
     }
 
-    public Map<Integer,Set<String>> getScoreGroups(){
-       Stream<Map<Integer,String>> scoreMap = students.stream().flatMap(s -> s.scores().values().stream().map(score-> Map.of(score,s.name())));
+    public Map<Integer,Set<String>> getGradeGroups(){
+       Stream<Map<Integer,String>> gradeMap = studentsRepository.findAll().stream().flatMap(s -> s.grades().values().stream().map(grade-> Map.of(grade,s.name())));
 
-        return scoreMap.flatMap(map -> map.entrySet().stream())
+        return gradeMap.flatMap(map -> map.entrySet().stream())
                 .collect(Collectors.groupingBy(
                         Map.Entry::getKey,
                         Collectors.mapping(Map.Entry::getValue, Collectors.toSet())
@@ -41,17 +40,17 @@ public class StudentImplementationService implements StudentsService{
     }
 
     public Map<String, List<String>> getStudentsBySubject(){
-        Stream<Map.Entry<String,String>> subjects = students.stream().flatMap(student -> student.scores().keySet().stream().map(sub -> Map.entry(sub,student.name())));
+        Stream<Map.Entry<String,String>> subjects = studentsRepository.findAll().stream().flatMap(student -> student.grades().keySet().stream().map(sub -> Map.entry(sub,student.name())));
 
         return subjects.collect(Collectors.groupingBy(
                         Map.Entry::getKey,
                         Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
     }
 
-    public List<List<StudentsModel>> orderStudentsByScore(){
-        Map<Double, List<StudentsModel>> studentMap = students.stream()
+    public List<List<StudentsModel>> orderStudentsByGrade(){
+        Map<Double, List<StudentsModel>> studentMap =  studentsRepository.findAll().stream()
                 .collect(Collectors.groupingBy(
-                        student -> student.scores().values().stream()
+                        student -> student.grades().values().stream()
                                 .mapToInt(Integer::intValue)
                                 .average().orElse(0)
                 ));
@@ -59,11 +58,11 @@ public class StudentImplementationService implements StudentsService{
     }
 
     public Map<String,List<String>> getSubjects(){
-        return students.stream().collect(Collectors.toMap(StudentsModel::name, s-> s.scores().keySet().stream().toList() ));
+        return studentsRepository.findAll().stream().collect(Collectors.toMap(StudentsModel::name, s-> s.grades().keySet().stream().toList() ));
     }
 
-    public Map<String,List<Integer>> getScores(){
-        return students.stream().collect(Collectors.toMap(StudentsModel::name,s -> s.scores().values().stream().toList()));
+    public Map<String,List<Integer>> getGrades(){
+        return studentsRepository.findAll().stream().collect(Collectors.toMap(StudentsModel::name,s -> s.grades().values().stream().toList()));
     }
 }
 

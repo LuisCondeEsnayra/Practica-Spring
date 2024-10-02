@@ -10,9 +10,9 @@ public interface StudentsService {
     List<StudentsModel> getStudents();
     List<StudentsModel> getStudentsByName(String name);
     List<StudentsModel> getExcellentStudents();
-    Map<Integer, Set<String>> getScoreGroups();
+    Map<Integer, Set<String>> getGradeGroups();
     Map<String, List<String>> getStudentsBySubject();
-    List<List<StudentsModel>> orderStudentsByScore();
+    List<List<StudentsModel>> orderStudentsByGrade();
     Map<String, List<String>> getSubjects();
-    Map<String,List<Integer>> getScores();
+    Map<String,List<Integer>> getGrades();
  }

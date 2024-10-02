@@ -55,6 +55,7 @@ public class StudentsController {
     @GetMapping("/getGrades")
     public Map<String,List<Integer>> getgrades(){
         return new ResponseEntity<>(students.getGrades(), HttpStatus.OK).getBody() ;
+
     }
 
 }
